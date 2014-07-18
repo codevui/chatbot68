@@ -2,8 +2,8 @@ package com.team68.chatbot68;
 
 import java.util.ArrayList;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -11,6 +11,8 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.TextView;
+
+
 
 public class ListApdapter extends BaseAdapter{
 	private Context mContext;
@@ -31,6 +33,8 @@ public class ListApdapter extends BaseAdapter{
 	public Object getItem(int position) {		
 		return mMessages.get(position);
 	}
+	
+	@SuppressLint("ResourceAsColor")
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent) {
 		Message message = (Message) this.getItem(position);
@@ -52,7 +56,7 @@ public class ListApdapter extends BaseAdapter{
 		//check if it is a status message then remove background, and change text color.
 		if(message.isStatusMessage())
 		{
-			holder.message.setBackgroundDrawable(null);
+			holder.message.setBackgroundResource(0);
 			lp.gravity = Gravity.LEFT;
 			holder.message.setTextColor(R.color.textFieldColor);
 		}
