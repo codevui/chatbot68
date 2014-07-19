@@ -53,7 +53,6 @@ public class ListApdapter extends BaseAdapter{
 		holder.message.setText(message.getMessage());
 		
 		LayoutParams lp = (LayoutParams) holder.message.getLayoutParams();
-		//check if it is a status message then remove background, and change text color.
 		if(message.isStatusMessage())
 		{
 			holder.message.setBackgroundResource(0);
@@ -62,13 +61,13 @@ public class ListApdapter extends BaseAdapter{
 		}
 		else
 		{		
-			//Check whether message is mine to show green background and align to right
+			//Align user's message to the right
 			if(message.isMine())
 			{
 				holder.message.setBackgroundResource(R.drawable.speech_bubble_green);
 				lp.gravity = Gravity.RIGHT;
 			}
-			//If not mine then it is from sender to show orange background and align to left
+			//Align bot's message to the left
 			else
 			{
 				holder.message.setBackgroundResource(R.drawable.speech_bubble_orange);
@@ -86,7 +85,7 @@ public class ListApdapter extends BaseAdapter{
 
 	@Override
 	public long getItemId(int position) {
-		//Unimplemented, because we aren't using Sqlite.
+		
 		return position;
 	}
 

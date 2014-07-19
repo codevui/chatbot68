@@ -3,112 +3,134 @@ package com.team68.chatbot68;
 import java.util.ArrayList;
 import java.util.Random;
 
-
+import android.app.AlertDialog;
 import android.app.ListActivity;
-import android.os.AsyncTask;
+import android.content.ActivityNotFoundException;
+import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
+import android.speech.RecognizerIntent;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
+import android.widget.Toast;
 
 public class MessageActivity extends ListActivity {
-	/** Called when the activity is first created. */
+	
 
 	ArrayList<Message> messages;
 	ListApdapter adapter;
 	EditText text;
-	static Random rand = new Random();	
+
+	protected static final int RESULT_SPEECH = 1;
+	static Random rand = new Random();
 	static String sender;
-	
+
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.main);
-		
+
 		text = (EditText) this.findViewById(R.id.text);
-		
-		sender = Utility.sender[rand.nextInt( Utility.sender.length-1)];
+
+		sender = "Team68";
 		this.setTitle(sender);
 		messages = new ArrayList<Message>();
 
-		messages.add(new Message("Hello", false));
-		messages.add(new Message("Hi!", true));
-		messages.add(new Message("Wassup??", false));
-		messages.add(new Message("nothing much, working on speech bubbles.", true));
-		messages.add(new Message("you say!", true));
-		messages.add(new Message("oh thats great. how are you showing them", false));
-		
-
 		adapter = new ListApdapter(this, messages);
 		setListAdapter(adapter);
-		addNewMessage(new Message("mmm, well, using 9 patches png to show them.", true));
-	}
-	public void sendMessage(View v)
-	{
-		String newMessage = text.getText().toString().trim(); 
-		if(newMessage.length() > 0)
-		{
-			text.setText("");
-			addNewMessage(new Message(newMessage, true));
-			new SendMessage().execute();
-		}
-	}
-	private class SendMessage extends AsyncTask<Void, String, String>
-	{
-		@Override
-		protected String doInBackground(Void... params) {
-			try {
-				Thread.sleep(2000); //simulate a network call
-			}catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-			
-			this.publishProgress(String.format("%s started writing", sender));
-			try {
-				Thread.sleep(2000); //simulate a network call
-			}catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-			this.publishProgress(String.format("%s has entered text", sender));
-			try {
-				Thread.sleep(3000);//simulate a network call
-			}catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-			
-			
-			return Utility.messages[rand.nextInt(Utility.messages.length-1)];
-			
-			
-		}
-		@Override
-		public void onProgressUpdate(String... v) {
-			
-			if(messages.get(messages.size()-1).isStatusMessage)//check wether we have already added a status message
-			{
-				messages.get(messages.size()-1).setMessage(v[0]); //update the status for that
-				adapter.notifyDataSetChanged(); 
-				getListView().setSelection(messages.size()-1);
-			}
-			else{
-				addNewMessage(new Message(true,v[0])); //add new message, if there is no existing status message
-			}
-		}
-		@Override
-		protected void onPostExecute(String text) {
-			if(messages.get(messages.size()-1).isStatusMessage)//check if there is any status message, now remove it.
-			{
-				messages.remove(messages.size()-1);
-			}
-			
-			addNewMessage(new Message(text, false)); // add the orignal message from server.
-		}
-		
 
 	}
-	void addNewMessage(Message m)
-	{
+
+	public void sendMessage(View v) {
+		/*
+		 * Text Input
+		 */
+		InputMethodManager inputManager = 
+		        (InputMethodManager) getApplicationContext().
+		            getSystemService(Context.INPUT_METHOD_SERVICE); 
+		inputManager.hideSoftInputFromWindow(
+		        this.getCurrentFocus().getWindowToken(),
+		        InputMethodManager.HIDE_NOT_ALWAYS);
+		
+		String newMessage = text.getText().toString().trim();
+		if (newMessage.length() > 0) {
+			text.setText("");
+			addNewMessage(new Message(newMessage, true));
+			if (Network.hasConnection(getApplicationContext())){
+				OnlineBot onlineBot = new OnlineBot(this);
+				onlineBot.setRequest(newMessage);
+				onlineBot.execute();
+			} else {
+				lostInternet();
+			}
+			
+			
+			
+
+		}
+	}
+	
+	public void lostInternet(){
+		AlertDialog.Builder builder1 = new AlertDialog.Builder(this);
+		builder1.setTitle("Mất kết nối");
+		builder1.setMessage("Vui lòng kết nối internet để tiếp tục trò chuyện");
+		builder1.setCancelable(true);
+		builder1.setNeutralButton(android.R.string.ok,
+		        new DialogInterface.OnClickListener() {
+		    public void onClick(DialogInterface dialog, int id) {
+		        dialog.cancel();
+		    }
+		});
+
+		AlertDialog alert11 = builder1.create();
+		alert11.show();
+	}
+	
+	public void voiceText(View v) {
+		/*
+		 * Convert voice to text
+		 */
+		Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+		intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,
+				RecognizerIntent.LANGUAGE_MODEL_WEB_SEARCH);
+		try {
+			startActivityForResult(intent, RESULT_SPEECH);
+
+		} catch (ActivityNotFoundException a) {
+			Toast t = Toast.makeText(getApplicationContext(),
+					"Oops! Your device doesn't support Speech to Text",
+					Toast.LENGTH_SHORT);
+			t.show();
+		}
+	}
+
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		super.onActivityResult(requestCode, resultCode, data);
+
+		switch (requestCode) {
+		case RESULT_SPEECH: {
+			if (resultCode == RESULT_OK && null != data) {
+
+				ArrayList<String> text = data
+						.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
+
+				addNewMessage(new Message(text.get(0), true));
+				OnlineBot onlineBot = new OnlineBot(this);
+				onlineBot.setRequest(text.get(0));
+				onlineBot.execute();
+			}
+			break;
+		}
+		}
+	}
+
+	void addNewMessage(Message m) {
 		messages.add(m);
 		adapter.notifyDataSetChanged();
-		getListView().setSelection(messages.size()-1);
+		getListView().setSelection(messages.size() - 1);
 	}
+
 }
