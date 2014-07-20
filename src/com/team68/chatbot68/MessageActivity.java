@@ -92,18 +92,23 @@ public class MessageActivity extends ListActivity {
 		/*
 		 * Convert voice to text
 		 */
-		Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
-		intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,
-				RecognizerIntent.LANGUAGE_MODEL_WEB_SEARCH);
-		try {
-			startActivityForResult(intent, RESULT_SPEECH);
+		if (Network.hasConnection(getApplicationContext())){
+			Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+			intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,
+					RecognizerIntent.LANGUAGE_MODEL_WEB_SEARCH);
+			try {
+				startActivityForResult(intent, RESULT_SPEECH);
 
-		} catch (ActivityNotFoundException a) {
-			Toast t = Toast.makeText(getApplicationContext(),
-					"Oops! Your device doesn't support Speech to Text",
-					Toast.LENGTH_SHORT);
-			t.show();
+			} catch (ActivityNotFoundException a) {
+				Toast t = Toast.makeText(getApplicationContext(),
+						"Oops! Your device doesn't support Speech to Text",
+						Toast.LENGTH_SHORT);
+				t.show();
+			}
+		} else {
+			lostInternet();
 		}
+		
 	}
 
 	@Override
