@@ -4,33 +4,35 @@
     android:versionCode="1"
     android:versionName="1.0" >
 
-    <uses-sdk 
-        android:minSdkVersion="8" 
-       
-        />
-    <uses-permission android:name="android.permission.INTERNET"></uses-permission>
-	<uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" ></uses-permission>
-	<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" ></uses-permission>
-	<uses-permission android:name="android.permission.ACCESS_WIFI_STATE" ></uses-permission>
-	
+    <uses-sdk android:minSdkVersion="8" />
+
+    <uses-permission android:name="android.permission.INTERNET" >
+    </uses-permission>
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" >
+    </uses-permission>
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" >
+    </uses-permission>
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" >
+    </uses-permission>
+
     <application
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name" >
         <activity
+            android:name="com.team68.chatbot68.MainActivity"
+            android:configChanges="orientation"
             android:label="@string/app_name"
-           
-            android:name="com.team68.chatbot68.MainActivity" >
-            <intent-filter >
+            android:screenOrientation="portrait" >
+            <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter> 
+            </intent-filter>
         </activity>
-        <activity 
+        <activity
             android:name="com.team68.chatbot68.MessageActivity"
-             android:windowSoftInputMode="adjustResize"
-            ></activity>
-        
+            android:windowSoftInputMode="adjustResize" >
+        </activity>
     </application>
 
 </manifest>
